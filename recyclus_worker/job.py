@@ -15,6 +15,7 @@ def clean_directory():
 
 class Job(object):
     def __init__(self, key, jobid, params):
+        logger.debug('new job: %s', jobid)
         self.key = key
         self.jobid = jobid
         self.path = jobs_path

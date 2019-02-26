@@ -7,4 +7,4 @@ RUN pip install -U pip \
 COPY . /code
 WORKDIR /code
 
-CMD python -m recyclus_worker &>> /jobs/error.log
+CMD python -m recyclus_worker
