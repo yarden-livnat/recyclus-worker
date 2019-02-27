@@ -1,12 +1,11 @@
-from pathlib import Path
-from redis import Redis
 import logging
-import json
-import requests
-from subprocess import CalledProcessError
-# from requests_toolbelt.multipart.encoder import MultipartEncoder
-from requests_toolbelt import MultipartEncoder
 import socket
+from pathlib import Path
+from subprocess import CalledProcessError
+
+from redis import Redis
+import requests
+from requests_toolbelt import MultipartEncoder
 
 from .job import Job
 
