@@ -11,7 +11,7 @@ jobs_path = Path('/jobs/')
 
 def clean_directory():
     for f in jobs_path.iterdir():
-        os.remove(f)
+        os.remove(str(f))
 
 
 class Job(object):
@@ -21,13 +21,14 @@ class Job(object):
         self.jobid = jobid
         self.path = jobs_path
         self.files = {}
-        self.set_files(params['sim']['scenario'], params['sim']['format'])
+        self.set_files(params['sim'])
 
-    def set_files(self, scenario, format):
+    def set_files(self, sim):
         clean_directory()
 
-        scenario_file = str(self.path / 'scenario.json')
-        output_file = str(self.path / f'cyclus.{format}')
+        filename = sim.get('scenario_filename', 'scenario.json')
+        scenario_file = str(self.path / filename)
+        output_file = str(self.path / f'cyclus.{sim["format"]}')
 
         self.files = dict(
             scenario=scenario_file,
@@ -35,7 +36,7 @@ class Job(object):
         )
         self.path.mkdir(parents=True, exist_ok=True)
         with open(scenario_file, 'w') as f:
-            f.write(str(scenario))
+            f.write(str(sim['scenario']))
 
     def run_sim(self):
         cmd = f'cyclus -o {self.files["output"]} {self.files["scenario"]}'
