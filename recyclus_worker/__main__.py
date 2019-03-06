@@ -1,3 +1,3 @@
-from .main import main
+from .worker import run
 
-main()
+run()
