@@ -1,3 +1,5 @@
 redis
 requests
 requests-toolbelt
+numpy
+pandas

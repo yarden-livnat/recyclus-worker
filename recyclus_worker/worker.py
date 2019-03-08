@@ -19,9 +19,9 @@ def run():
     logging.info('Cyclus worker stated on %s', hostname)
 
     for i in range(num_threads):
-        name = f'task-{i}'
+        name = f'thread-{i}'
         jobs.append(Job(name, wdir / name))
-        logger.info('started job %s', name)
+        logger.info('started thread %s', name)
 
     for job in jobs:
         job.join()
