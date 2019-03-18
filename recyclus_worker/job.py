@@ -20,10 +20,10 @@ cache = Redis(host='redis', db=0, decode_responses=True) #  socket_connect_timeo
 
 
 class Job(Thread):
-    def __init__(self, name, wdir):
+    def __init__(self, project, wdir):
         super().__init__()
         self.daemon = True
-        self.name = name
+        self.project = project
         self.wdir = Path(wdir)
         self.wdir.mkdir(parents=True, exist_ok=True)
         self.files = {}
@@ -39,19 +39,17 @@ class Job(Thread):
 
     def run(self):
         while True:
-            self.cleanup()
+            self.reset()
             self.key = cache.brpoplpush('q:submit', 'q:running')
+
             cache.hset(self.key, 'ctrl', 'run')
             cache.hset(self.key, 'status', 'running')
             self.jobid = cache.hget(self.key, 'jobid')
             self.tasks = json.loads(cache.hget(self.key, 'tasks'))
-            # self.logid = cache.hget(self.key, 'logid')
             logger.debug('job %s started', self.jobid)
 
-            # self.log({'status': 'running'})
-
             status = self.run_sim()
-            if status['status'] == 'done':
+            if status['status'] == 'completed':
                 status = self.run_post()
 
             cache.hset(self.key, 'status',status['status'])
@@ -59,7 +57,7 @@ class Job(Thread):
             cache.lpush('q:done', self.key)
             logger.debug('job %s ended', self.jobid)
 
-    def cleanup(self):
+    def reset(self):
         self.key = None
         self.jobid = None
         self.files = {}
@@ -162,7 +160,7 @@ class Job(Thread):
     def save_files(self, files):
         data = {
             'user': cache.hget(self.key, 'user'),
-            'name': cache.hget(self.key, 'name'),
+            'project': cache.hget(self.key, 'project'),
             'jobid': self.jobid
         }
 

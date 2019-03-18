@@ -10,6 +10,8 @@ build:
 push: build
 	docker push $(user)/$(name)
 
+status:
+	git status
 
 clean:
 	docker image rm $(user)/$(name)
