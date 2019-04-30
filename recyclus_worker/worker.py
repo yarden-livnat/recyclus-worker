@@ -3,7 +3,7 @@ import socket
 from pathlib import Path
 from .job import Job
 
-num_threads = 3
+num_threads = 1
 hostname = f'worker-{socket.gethostname()}'
 
 logger = logging.getLogger()

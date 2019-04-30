@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 datastore = 'http://datastore:5020/api/internal/store'
 
-cache = Redis(host='redis', db=0, decode_responses=True) #  socket_connect_timeout=2, socket_timeout=2)
+cache = Redis(host='redis')
 
 
 class Job(Thread):
@@ -25,13 +25,13 @@ class Job(Thread):
         self.daemon = True
         self.project = project
         self.wdir = Path(wdir)
-        self.wdir.mkdir(parents=True, exist_ok=True)
         self.files = {}
         self.key = None
         self.tasks = {}
         self.jobid = None
         self.logid = None
 
+        self.wdir.mkdir(parents=True, exist_ok=True)
         self.start()
 
     def log(self, fields):
@@ -125,7 +125,7 @@ class Job(Thread):
         }
         try:
             self.files['stdio'] = self.wdir / f'{name}_output.txt'
-            with open(self.wdir / 'output.txt', 'wb') as out:
+            with open(self.files['stdio'], 'wb') as out:
                 process = Popen(cmd, shell=True, stdout=out, stderr=STDOUT)
                 while True:
                     time.sleep(PROCESS_MONITOR_DELAY)
@@ -140,15 +140,18 @@ class Job(Thread):
             elif process.returncode > 0:
                 status['status'] = 'failed'
                 status['reason'] = f'exit code:{process.returncode}'
+                logger.error('task %s: status failed with %d', self.jobid,process.returncode)
             else:
                 status['status'] = 'canceled'
+
         except (CalledProcessError, Exception) as e:
             logger.error('job %s: exception %s', self.jobid, str(e))
             status['status'] = 'failed'
             status['reason'] = str(e)
         finally:
             end_time = datetime.now()
-            files = [name for name in self.files if name in opts['files']]
+            # files = [name for name in self.files if name in opts['files']]
+            files = [name for name in self.files] 
             self.save_files(files)
             status['ended at'] = str(end_time).split('.', 2)[0]
             status['duration'] = str(end_time - start_time).split('.', 2)[0]
