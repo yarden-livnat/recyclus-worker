@@ -49,8 +49,10 @@ class Job(Thread):
             logger.debug('job %s started', self.jobid)
 
             status = self.run_sim()
-            if status['status'] == 'completed':
-                status = self.run_post()
+
+            # NOTE: disable post for now
+            # if status['status'] == 'completed':
+            #     status = self.run_post()
 
             cache.hset(self.key, 'status',status['status'])
             cache.lrem('q:running', 1, self.key)
@@ -151,7 +153,7 @@ class Job(Thread):
         finally:
             end_time = datetime.now()
             # files = [name for name in self.files if name in opts['files']]
-            files = [name for name in self.files] 
+            files = [name for name in self.files]
             self.save_files(files)
             status['ended at'] = str(end_time).split('.', 2)[0]
             status['duration'] = str(end_time - start_time).split('.', 2)[0]
